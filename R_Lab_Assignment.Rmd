@@ -1,0 +1,262 @@
+---
+title: "DS311 - R Lab Assignment"
+author: "Pedro Chavez"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: united
+    highlight: tango
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Assignment 1
+
+* In this assignment, we are going to apply some of the build in data set in R for descriptive statistics analysis.
+* To earn full grade in this assignment, students need to complete the coding tasks for each question to get the result.
+* After finished all the questions, knit the document into HTML format for submission.
+
+### Question 1
+
+Using the **mtcars** data set in R, please answer the following questions.
+
+```{r}
+# Loading the data
+data(mtcars)
+
+# Head of the data set
+head(mtcars)
+```
+
+a. Report the number of variables and observations in the data set.
+
+```{r}
+# Enter your code here!
+num_variables <- ncol(mtcars)
+num_observations <- nrow(mtcars)
+
+# Answer:
+cat("There are total of", num_variables, "variables and", num_observations, "observations in this data set.")
+```
+
+
+
+b. Print the summary statistics of the data set and report how many discrete and continuous variables are in the data set.
+
+```{r}
+# Enter your code here!
+summary_stats <- summary(mtcars)
+print(summary_stats)
+
+# Answer:
+num_unique_values <- sapply(mtcars, function(x) length(unique(x)))
+discrete_variables <- names(num_unique_values[num_unique_values <= 10])  # Adjust the threshold as needed
+
+cat("\nThere are", length(discrete_variables), "discrete variables and",
+    ncol(mtcars) - length(discrete_variables), "continuous variables in this data set.")
+```
+
+
+
+c. Calculate the mean, variance, and standard deviation for the variable **mpg** and assign them into variable names m, v, and s. Report the results in the print statement.
+
+```{r}
+# Enter your code here!
+m <- mean(mtcars$mpg)
+v <- var(mtcars$mpg)
+s <- sd(mtcars$mpg)
+
+cat("\nThe mean of mpg is:", m)
+cat("\nThe variance of mpg is:", v)
+cat("\nThe standard deviation of mpg is:", s)
+
+
+
+# print(paste("The average of Mile Per Gallon from this data set is ",  , " with variance ",  , " and standard deviation",  , "."))
+
+cat("\nThe average of Mile Per Gallon from this data set is:", m,
+    "with variance:", v, "and standard deviation:", s, ".")
+```
+
+
+
+d. Create two tables to summarize 1) average mpg for each cylinder class and 2) the standard deviation of mpg for each gear class.
+
+```{r}
+# Enter your code here!
+avg_mpg_by_cyl <- tapply(mtcars$mpg, mtcars$cyl, mean)
+sd_mpg_by_gear <- tapply(mtcars$mpg, mtcars$gear, sd)
+
+cat("\nTable 1: Average mpg for each cylinder class\n")
+print(avg_mpg_by_cyl)
+
+cat("\nTable 2: Standard deviation of mpg for each gear class\n")
+print(sd_mpg_by_gear)
+
+
+
+```
+
+
+
+e. Create a crosstab that shows the number of observations belong to each cylinder and gear class combinations. The table should show how many observations given the car has 4 cylinders with 3 gears, 4 cylinders with 4 gears, etc. Report which combination is recorded in this data set and how many observations for this type of car.
+
+```{r}
+# Enter your code here!
+cross_table <- table(mtcars$cyl, mtcars$gear)
+most_common_combination <- which.max(cross_table)
+
+num_cylinders <- rownames(cross_table)[most_common_combination[1]]
+num_gears <- colnames(cross_table)[most_common_combination[2]]
+
+num_observations <- cross_table[most_common_combination]
+
+cat("\nThe most common car type in this data set is a car with", num_cylinders, "cylinders and", num_gears, "gears.",
+    "There are a total of", num_observations, "cars belonging to this specification in the data set.")
+
+```
+
+
+*** 
+
+### Question 2
+
+Use different visualization tools to summarize the data sets in this question.
+
+a. Using the **PlantGrowth** data set, visualize and compare the weight of the plant in the three separated group. Give labels to the title, x-axis, and y-axis on the graph. Write a paragraph to summarize your findings.
+
+```{r}
+# Load the data set
+data("PlantGrowth")
+
+# Head of the data set
+head(PlantGrowth)
+
+# Enter your code here!
+boxplot(weight ~ group, data = PlantGrowth, 
+        main = "Weight of Plants by Group",
+        xlab = "Group",
+        ylab = "Weight")
+
+text(1, max(PlantGrowth$weight) + 2, "Control", pos = 3, col = "blue")
+text(2, max(PlantGrowth$weight) + 2, "Treatment 1", pos = 3, col = "green")
+text(3, max(PlantGrowth$weight) + 2, "Treatment 2", pos = 3, col = "red")
+
+```
+
+Result:
+
+=> Report a paragraph to summarize your findings from the plot!
+The control group of the Plants have a consisten weight to each plant. If we compare the boxes of the three groupls we note the control group holds the largest box, and the whiskers are not as exagerated as the other two. By this, it is in reference to the weight distribution of both Treatment groups where they have more veriance amongst the plants.
+
+
+b. Using the **mtcars** data set, plot the histogram for the column **mpg** with 10 breaks. Give labels to the title, x-axis, and y-axis on the graph. Report the most observed mpg class from the data set.
+
+```{r}
+hist(mtcars$mpg, breaks = 10, col = "skyblue", 
+     main = "Histogram of MPG",
+     xlab = "Miles Per Gallon (mpg)",
+     ylab = "Frequency")
+
+mpg_table <- table(cut(mtcars$mpg, breaks = 10))
+most_observed_mpg_class <- as.character(max(mpg_table, na.rm = TRUE))
+
+cat("\nThe most observed MPG class in this data set is:", most_observed_mpg_class)
+
+```
+
+
+
+
+
+c. Using the **USArrests** data set, create a pairs plot to display the correlations between the variables in the data set. Plot the scatter plot with **Murder** and **Assault**. Give labels to the title, x-axis, and y-axis on the graph. Write a paragraph to summarize your results from both plots.
+
+```{r}
+# Load the data set
+data("USArrests")
+
+# Head of the data set
+head(USArrests)
+
+# Enter your code here!
+pairs(USArrests, main = "Pairs Plot of USArrests Variables")
+
+plot(USArrests$Murder, USArrests$Assault, col = "blue",
+     main = "Scatter Plot of Murder and Assault",
+     xlab = "Murder",
+     ylab = "Assault")
+
+```
+
+Result:
+
+=> Report a paragraph to summarize your findings from the plot!
+Simple glance reveals as there are more assaults there are more murders. Given this is a scatter plot it shows there is correlation; however, it does mean causation. Looking at the data frame itself with raw numbers and states, there is something particular being displayed. We have states that are relatively less wealthy than their counterparts and they exhibit higher assault and murder rates. 
+
+
+***
+
+### Question 3
+
+Download the housing data set from www.jaredlander.com and find out what explains the housing prices in New York City.
+
+Note: Check your working directory to make sure that you can download the data into the data folder. 
+
+```{r, echo=FALSE}
+# Load and clean the housing data set 
+download.file(url='https://www.jaredlander.com/data/housing.csv',
+              destfile='data/housing.csv', mode='wb')
+housingData <- read.csv('data/housing.csv')
+housingData <- subset(housingData, 
+                      select = c("Neighborhood", "Market.Value.per.SqFt", "Boro", "Year.Built"))
+housingData <- na.omit(housingData)                   
+```
+
+a. Create your own descriptive statistics and aggregation tables to summarize the data set and find any meaningful results between different variables in the data set.
+
+```{r}
+# Head of the cleaned data set
+head(housingData)
+
+# Enter your code here!
+hist(housingData$Year.Built, col = "lightblue", main = "Histogram of Year Built",
+     xlab = "Year Built", ylab = "Frequency")
+
+hist(housingData$Market.Value.per.SqFt, col = "lightgreen", main = "Histogram of Market Value per SqFt",
+     xlab = "Market Value per SqFt", ylab = "Frequency")
+
+barplot(table(housingData$Boro), col = "lightcoral", main = "Bar Plot of Boro",
+        xlab = "Boro", ylab = "Frequency")
+
+barplot(table(housingData$Neighborhood), horiz = TRUE, col = "lightyellow",
+        main = "Horizontal Bar Plot of Neighborhood",
+        xlab = "Frequency", ylab = "Neighborhood", las = 2)
+
+
+
+
+```
+
+b. Create multiple plots to demonstrates the correlations between different variables. Remember to label all axes and give title to each graph.
+
+```{r}
+# Enter your code here!
+stripchart(housingData$Market.Value.per.SqFt ~ housingData$Boro, method = "jitter",
+           col = "blue", vertical = TRUE,
+           main = "Dot Plot: Boro vs. Market Value per SqFt",
+           xlab = "Boro", ylab = "Market Value per SqFt")
+stripchart(housingData$Year.Built ~ housingData$Boro, method = "jitter",
+           col = "green", vertical = TRUE,
+           main = "Dot Plot: Year Built vs. Boro",
+           xlab = "Boro", ylab = "Year Built")
+
+```
+
+c. Write a summary about your findings from this exercise.
+
+=> Enter your answer here!
+The analysis of the housing dataset highlights distinct patterns in neighborhood development and market values. Manhattan stands out as a consistently developing area with a notable increase in property values over time. In contrast, Staten Island and the Bronx appear to show comparatively lower development rates, reflecting a trend of relative underdevelopment. The horizontal bar plot with rotated axis labels effectively illustrates these patterns, providing a visual representation of the frequency distribution of neighborhoods. This exercise sheds light on the varying trajectories of development across different boroughs, offering valuable insights for further exploration and analysis.
+
